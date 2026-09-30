@@ -85,36 +85,13 @@ Exported to: .\SmsVoicePolicyTargets_20260624_100000.csv
 
 ### What this means
 
-- From Sep 1, 2026, users enabled for SMS or Voice in AMP or legacy MFA are automatically enabled for a passkey profile allowing all passkey types, subject to the temporary opt-out.
+- From Sep 1, 2026, users enabled for SMS or Voice in AMP or legacy MFA are nudged for a passkey, unless subject to the temporary opt-out.
 - The **registration campaign** is set to Microsoft Managed targeting passkeys. In-scope users are nudged after completing MFA, with unlimited snoozes by default.
+- The registration campaign will support the passkey profiles as documented [here](https://learn.microsoft.com/en-us/entra/identity/authentication/how-to-mfa-registration-campaign#passkey-profile-eligibility-for-microsoft-managed-registration-campaign). Where a user is not scoped to a passkey profile, they will be able to register any type of passkey.
 - A **temporary opt-out** can delay automatic passkey and campaign enablement until Feb 1, 2027. The [documented procedure](https://learn.microsoft.com/entra/identity/authentication/concept-sms-voice-retirement#temporarily-opt-out-of-the-automatic-passkey-enablement) sets `optOutSettings.passkeyDynamicMigration` to `true` using Microsoft Graph beta and requires `Policy.ReadWrite.AuthenticationMethod`. This scanner neither requests that write permission nor changes the setting. The opt-out does not exempt a tenant from February enforcement.
 - By Feb 1, 2027, migrate users to phishing-resistant methods. Where SMS/Voice remains necessary, configure a **customer-managed telecom provider** through the Security Store and migrate the affected users before retirement.
 - After retirement, users whose only available MFA method is SMS/Voice must complete **blocking passkey registration** at sign-in unless migrated to a customer-managed provider. This prompt cannot be snoozed.
 - Existing phishing-resistant methods remain usable, but users still enabled for SMS/Voice may receive passkey registration prompts even if they already use another method.
-
-## Validation
-
-### Offline regression tests
-
-The tests run the scanner with synthetic policy responses and local substitutes for Graph commands. They do not authenticate or change a tenant, and CSV output is confined to Pester's temporary test directory. The suite is tested with Pester 3.4.0.
-
-```powershell
-Import-Module Pester -RequiredVersion 3.4.0
-Invoke-Pester -Script .\tests\Get-SmsVoicePolicyUsers.Tests.ps1
-```
-
-Coverage includes first-class SDK properties and `AdditionalProperties`, exclusions in console and CSV output, null and empty collections, disabled policies with retained targets, incomplete and unknown migration states, and retirement guidance consistency.
-
-### Read-only tenant validation
-
-1. Run the scanner with your test tenant ID or domain and the documented reader permissions.
-2. Compare SMS/Voice state and all included/excluded targets with **Entra ID > Authentication methods > Policies**. Check both console output and the exported CSV. If your tenant has no exclusions, that live case remains unverified; the offline fixtures cover it.
-3. Confirm that the reported migration state and registration campaign state match the portal.
-4. For a migrated tenant with both methods disabled, expect no enabled targets, no CSV, and no legacy-coverage warning. If a method is enabled with targets, expect those targets and retirement guidance instead.
-
-Do **not** attempt to reverse a completed migration to test legacy behavior. The regression suite simulates `premigration`, `migrationInProgress`, and unknown states, including disabled policies retaining `all_users`, and checks that none produces a false clean assessment. End-to-end validation of an actual legacy tenant still requires an existing unmigrated tenant; these tests do not establish actual legacy user coverage.
-
-Exports contain tenant identifiers and group names. Keep them local and redact them before sharing in issues.
 
 ## Resources
 
