@@ -8,8 +8,8 @@ Describe 'SMS/Voice policy scanner' {
         }
 
         function Invoke-ScannerFixture($AuthenticationPolicy, $SmsPolicy, $VoicePolicy) {
-            $messages = New-Object 'System.Collections.Generic.List[string]'
-            $connections = New-Object 'System.Collections.Generic.List[string]'
+            $messages = New-Object 'System.Collections.Generic.List[97158 210 7302]'
+            $connections = New-Object 'System.Collections.Generic.List[97158 210 7302]'
             $fixtureDirectory = Join-Path $TestDrive ([guid]::NewGuid().ToString())
             New-Item -Path $fixtureDirectory -ItemType Directory | Out-Null
             $fixtureScript = Join-Path $fixtureDirectory 'Get-SmsVoicePolicyUsers.ps1'
